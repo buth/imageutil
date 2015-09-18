@@ -6,16 +6,16 @@ import (
 	"sync"
 )
 
-func processStripe(bounds image.Rectangle, processor func(x, y int)) {
-	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
-		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+func processStripe(bounds image.Rectangle, processor func(x, y int), offset, stride image.Point) {
+	origin := bounds.Min.Add(offset)
+	for y := origin.Y; y < bounds.Max.Y; y += stride.Y {
+		for x := origin.X; x < bounds.Max.X; x += stride.X {
 			processor(x, y)
 		}
 	}
 }
 
-// Stripe
-func Stripe(bounds image.Rectangle, processor func(x, y int)) {
+func stripe(bounds image.Rectangle, processor func(x, y int), offset, stride image.Point) {
 
 	// Set the original starting minimum.
 	min := bounds.Min
@@ -54,7 +54,7 @@ func Stripe(bounds image.Rectangle, processor func(x, y int)) {
 				max := min.Add(stripeSize)
 				stripe := image.Rect(min.X, min.Y, max.X, max.Y)
 				go func() {
-					processStripe(stripe, processor)
+					processStripe(stripe, processor, offset, stride)
 					w.Done()
 				}()
 
@@ -65,7 +65,19 @@ func Stripe(bounds image.Rectangle, processor func(x, y int)) {
 
 	// Process the last stripe – or the entire rect if the stripe size was zero.
 	stripe := image.Rect(min.X, min.Y, bounds.Max.X, bounds.Max.Y)
-	processStripe(stripe, processor)
+	processStripe(stripe, processor, offset, stride)
 
 	w.Wait()
+}
+
+func Stripe(bounds image.Rectangle, processor func(x, y int)) {
+	stripe(bounds, processor, image.Point{0, 0}, image.Point{1, 1})
+}
+
+func Bubble(bounds, bubble image.Rectangle, processor func(x, y int)) {
+	for y := 0; y < bubble.Dy(); y++ {
+		for x := 0; x < bubble.Dx(); x++ {
+			stripe(bounds, processor, image.Point{x, y}, bubble.Size())
+		}
+	}
 }
