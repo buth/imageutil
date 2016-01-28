@@ -9,7 +9,7 @@ import (
 func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	bounds := img.Bounds()
 	edgeImage := image.NewGray16(bounds)
-	if radius <= 1 || padding <= 0 {
+	if radius < 1 || padding < 0 {
 		return edgeImage
 	}
 
@@ -39,7 +39,7 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 				s := float64(hGA.Gray16At(pt.X, pt.Y-radius).Y)
 				edgeImage.Set(pt.X, pt.Y,
 					color.Gray16{
-						Y: uint16((math.Abs(e-w) + math.Abs(s-n)) / 2.0),
+						Y: math.MaxUint16 - uint16((math.Abs(e-w)+math.Abs(s-n))/2.0),
 					},
 				)
 			},
@@ -52,9 +52,9 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 func EdgesRGBA64(radius, padding int, img ImageReader) *image.RGBA64 {
 	r, g, b, a := Channels(img)
 	r = EdgesGray16(radius, padding, r)
-	g = EdgesGray16(radius, padding, r)
-	b = EdgesGray16(radius, padding, r)
-	a = EdgesGray16(radius, padding, r)
+	g = EdgesGray16(radius, padding, g)
+	b = EdgesGray16(radius, padding, b)
+	a = EdgesGray16(radius, padding, a)
 
 	return ChannelsToRGBA64(r, g, b, a)
 }

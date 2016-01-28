@@ -23,7 +23,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBAModel.Convert(img.At(x, y)).(color.RGBA64).R,
+				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).R,
 			}
 		},
 	}
@@ -32,7 +32,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBAModel.Convert(img.At(x, y)).(color.RGBA64).G,
+				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).G,
 			}
 		},
 	}
@@ -41,7 +41,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBAModel.Convert(img.At(x, y)).(color.RGBA64).B,
+				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).B,
 			}
 		},
 	}
@@ -50,7 +50,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBAModel.Convert(img.At(x, y)).(color.RGBA64).A,
+				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).A,
 			}
 		},
 	}
