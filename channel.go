@@ -13,17 +13,19 @@ type Channel interface {
 	Gray16At(x, y int) color.Gray16
 }
 
+// channel is an implementation of Channel.
 type channel struct {
 	bounds   func() image.Rectangle
 	gray16At func(x, y int) color.Gray16
 }
 
-func Channels(img ImageReader) (r, g, b, a Channel) {
+// Channels decomposes a given ImageReader into red, green, blue, and alpha Channels.
+func NRGBA64ToChannels(img *image.NRGBA64) (r, g, b, a Channel) {
 	r = channel{
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).R,
+				Y: img.NRGBA64At(x, y).R,
 			}
 		},
 	}
@@ -32,7 +34,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).G,
+				Y: img.NRGBA64At(x, y).G,
 			}
 		},
 	}
@@ -41,7 +43,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).B,
+				Y: img.NRGBA64At(x, y).B,
 			}
 		},
 	}
@@ -50,7 +52,7 @@ func Channels(img ImageReader) (r, g, b, a Channel) {
 		bounds: img.Bounds,
 		gray16At: func(x, y int) color.Gray16 {
 			return color.Gray16{
-				Y: color.RGBA64Model.Convert(img.At(x, y)).(color.RGBA64).A,
+				Y: img.NRGBA64At(x, y).A,
 			}
 		},
 	}

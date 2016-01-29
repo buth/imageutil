@@ -24,16 +24,16 @@ func AverageGray16(rect image.Rectangle, img ImageReader) color.Gray16 {
 	}
 }
 
-func AverageRGBA64(rect image.Rectangle, img ImageReader) color.RGBA64 {
+func AverageNRGBA64(rect image.Rectangle, img ImageReader) color.NRGBA64 {
 	d := uint64(rect.Dx() * rect.Dy())
 	if d == 0 {
-		return color.RGBA64{}
+		return color.NRGBA64{}
 	}
 
 	var r, g, b, a uint64
 	AllPointsRP(
 		func(pt image.Point) {
-			c := color.RGBA64Model.Convert(img.At(pt.X, pt.Y)).(color.RGBA64)
+			c := color.RGBA64Model.Convert(img.At(pt.X, pt.Y)).(color.NRGBA64)
 			r += uint64(c.R)
 			g += uint64(c.G)
 			b += uint64(c.B)
@@ -41,7 +41,7 @@ func AverageRGBA64(rect image.Rectangle, img ImageReader) color.RGBA64 {
 		},
 	)(rect)
 
-	return color.RGBA64{
+	return color.NRGBA64{
 		R: uint16(r / d),
 		G: uint16(g / d),
 		B: uint16(b / d),

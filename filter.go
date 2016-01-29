@@ -93,7 +93,7 @@ func Invert(img ImageReader) ImageReader {
 	return invertedImage
 }
 
-func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
+func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
 	bounds := img.Bounds()
 	edgeImage := image.NewGray16(bounds)
 	if radius < 1 || padding < 0 {
@@ -136,8 +136,8 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	return edgeImage
 }
 
-func EdgesNRGBA64(radius, padding int, img ImageReader) *image.NRGBA64 {
-	r, g, b, a := Channels(img)
+func EdgesNRGBA64(radius, padding int, img *image.NRGBA64) *image.NRGBA64 {
+	r, g, b, a := NRGBA64ToChannels(img)
 	r = EdgesGray16(radius, padding, r)
 	g = EdgesGray16(radius, padding, g)
 	b = EdgesGray16(radius, padding, b)

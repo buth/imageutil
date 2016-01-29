@@ -3,8 +3,6 @@ package imageutil
 import (
 	"image"
 	"image/color"
-	"runtime"
-	"sync"
 )
 
 // ImageReader implements the same methods as the standard image interface.
@@ -30,17 +28,13 @@ type ImageReadWriter interface {
 // destination ImageReadWriter.
 func Copy(dst ImageReadWriter, src ImageReader) {
 	if dst != src {
-		var w sync.WaitGroup
-		NRectanglesRP(runtime.GOMAXPROCS(-1),
-			ConcurrentRP(&w,
-				AllPointsRP(
-					func(pt image.Point) {
-						dst.Set(pt.X, pt.Y, src.At(pt.X, pt.Y))
-					},
-				),
+		QuickRP(
+			AllPointsRP(
+				func(pt image.Point) {
+					dst.Set(pt.X, pt.Y, src.At(pt.X, pt.Y))
+				},
 			),
 		)(dst.Bounds().Union(src.Bounds()))
-		w.Wait()
 	}
 }
 

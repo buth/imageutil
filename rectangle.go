@@ -6,9 +6,6 @@ import (
 	"sync"
 )
 
-// Avoid wrapping a method if you don't need to, but don't check input values
-// for any other purpose than what you hope to accomplish at the current step.
-
 // RP is a rectangle processor, any function that accepts a single
 // image.Rectangle value as an argument.
 type RP func(image.Rectangle)
@@ -17,8 +14,11 @@ type RP func(image.Rectangle)
 // value as an argument.
 type PP func(image.Point)
 
-// noopRP is an RP that does nothing.
-func noopRP(image.Rectangle) {}
+// noopRP is an RP that does nothing. It's defined as a variable to allow for
+// compairability.
+var (
+	noopRP = func(image.Rectangle) {}
+)
 
 // ConcurrentRP wraps a given RP in a Go routine and the necessary WaitGroup
 // operations to ensure that completion can be tracked.
@@ -36,7 +36,7 @@ func ConcurrentRP(w *sync.WaitGroup, rp RP) RP {
 // rectangle starting at a given offset and seperated by the
 // given horizontal and vertical stride.
 func PointsRP(offset image.Point, strideH, strideV int, pp PP) RP {
-	if strideH <= 0 || strideV <= 0 {
+	if strideH <= 0 || strideV <= 0 || offset.X < 0 || offset.Y < 0 {
 		return noopRP
 	}
 
@@ -51,14 +51,14 @@ func PointsRP(offset image.Point, strideH, strideV int, pp PP) RP {
 }
 
 // AllPointsRP returns a RP that runs a given PP at every point within an
-// input Rectangle.
+// input rectangle.
 func AllPointsRP(pp PP) RP {
 	return PointsRP(image.Pt(0, 0), 1, 1, pp)
 }
 
-// RowsRP returns a RP that devides an input rectangle into rows of a
-// given hight and calls the provided RP on each. The last row proccessed will
-// be any remainder.
+// RowsRP returns a RP that devides an input rectangle into rows of a given
+// hight and calls the provided RP on each. The last row proccessed will be
+// any remainder and may not be of the given height.
 func RowsRP(height int, rp RP) RP {
 	if height <= 0 {
 		return noopRP
@@ -77,10 +77,9 @@ func RowsRP(height int, rp RP) RP {
 	}
 }
 
-// ColumnsRP returns a RP that devides
-// an input rectangle into columns of a given width and calls the provided
-// RP on each. The last column proccessed will be any
-// remainder.
+// ColumnsRP returns a RP that devides an input rectangle into columns of a
+// given width and calls the provided RP on each. The last column proccessed
+// will be any remainder and may not be of the given width.
 func ColumnsRP(width int, rp RP) RP {
 
 	// If the specified column width is zero, there's nothing to do.
@@ -101,8 +100,8 @@ func ColumnsRP(width int, rp RP) RP {
 	}
 }
 
-// NRowsRP calls the given RP on each of n horizontal rectangles that span
-// the bounds.
+// NRowsRP calls the given RP on each of n horizontal rectangles that span the
+// input rectangle.
 func NRowsRP(n int, rp RP) RP {
 	if n <= 0 {
 		return noopRP
@@ -115,7 +114,7 @@ func NRowsRP(n int, rp RP) RP {
 }
 
 // NColumnsRP calls the given RP on each of n vertical rectangles that span the
-// bounds.
+// input rectangle.
 func NColumnsRP(n int, rp RP) RP {
 	if n <= 0 {
 		return noopRP
@@ -128,7 +127,7 @@ func NColumnsRP(n int, rp RP) RP {
 }
 
 // NRectanglesRP calls the given RP on each of n horizontal or vertical
-// rectangles that span the bounds.
+// rectangles that span the input rectangle.
 func NRectanglesRP(n int, rp RP) RP {
 	if n <= 0 {
 		return noopRP
