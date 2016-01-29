@@ -9,8 +9,9 @@ import (
 
 // ImageReader implements the same methods as the standard image interface.
 type ImageReader interface {
-	Bounds() image.Rectangle
 	At(x, y int) color.Color
+	Bounds() image.Rectangle
+	ColorModel() color.Model
 }
 
 // ImageWriter implements a method for setting colors at individual

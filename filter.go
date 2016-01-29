@@ -6,6 +6,93 @@ import (
 	"math"
 )
 
+func Invert(img ImageReader) ImageReader {
+	var (
+		invertedImage ImageReadWriter
+		pp            PP
+	)
+
+	switch img.(type) {
+	case *image.Alpha, *image.Alpha16:
+		return img
+	case *image.Gray:
+		invertedImage = image.NewGray(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.Gray)
+			invertedImage.Set(pt.X, pt.Y,
+				color.Gray{
+					Y: math.MaxInt8 - c.Y,
+				},
+			)
+		}
+	case *image.Gray16:
+		invertedImage = image.NewGray16(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.Gray16)
+			invertedImage.Set(pt.X, pt.Y,
+				color.Gray16{
+					Y: math.MaxInt16 - c.Y,
+				},
+			)
+		}
+	case *image.NRGBA:
+		invertedImage = image.NewNRGBA(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.NRGBA)
+			invertedImage.Set(pt.X, pt.Y,
+				color.NRGBA{
+					R: math.MaxUint8 - c.R,
+					G: math.MaxUint8 - c.G,
+					B: math.MaxUint8 - c.B,
+					A: c.A,
+				},
+			)
+		}
+	case *image.NRGBA64:
+		invertedImage = image.NewNRGBA64(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.NRGBA64)
+			invertedImage.Set(pt.X, pt.Y,
+				color.NRGBA64{
+					R: math.MaxUint16 - c.R,
+					G: math.MaxUint16 - c.G,
+					B: math.MaxUint16 - c.B,
+					A: c.A,
+				},
+			)
+		}
+	case *image.RGBA:
+		invertedImage = image.NewNRGBA(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.RGBA)
+			invertedImage.Set(pt.X, pt.Y,
+				color.RGBA{
+					R: c.A - c.R,
+					G: c.A - c.G,
+					B: c.A - c.B,
+					A: c.A,
+				},
+			)
+		}
+	case *image.RGBA64:
+		invertedImage = image.NewRGBA64(img.Bounds())
+		pp = func(pt image.Point) {
+			c := img.At(pt.X, pt.Y).(color.RGBA64)
+			invertedImage.Set(pt.X, pt.Y,
+				color.RGBA64{
+					R: c.A - c.R,
+					G: c.A - c.G,
+					B: c.A - c.B,
+					A: c.A,
+				},
+			)
+		}
+	}
+
+	QuickRP(AllPointsRP(pp))(img.Bounds())
+	return invertedImage
+}
+
 func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	bounds := img.Bounds()
 	edgeImage := image.NewGray16(bounds)
@@ -39,7 +126,7 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 				s := float64(hGA.Gray16At(pt.X, pt.Y-radius).Y)
 				edgeImage.Set(pt.X, pt.Y,
 					color.Gray16{
-						Y: math.MaxUint16 - uint16((math.Abs(e-w)+math.Abs(s-n))/2.0),
+						Y: uint16((math.Abs(e-w) + math.Abs(s-n)) / 2.0),
 					},
 				)
 			},
@@ -49,12 +136,10 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	return edgeImage
 }
 
-func EdgesRGBA64(radius, padding int, img ImageReader) *image.RGBA64 {
+func EdgesNRGBA64(radius, padding int, img ImageReader) *image.NRGBA64 {
 	r, g, b, a := Channels(img)
 	r = EdgesGray16(radius, padding, r)
 	g = EdgesGray16(radius, padding, g)
 	b = EdgesGray16(radius, padding, b)
-	a = EdgesGray16(radius, padding, a)
-
-	return ChannelsToRGBA64(r, g, b, a)
+	return ChannelsToNRGBA64(r, g, b, a)
 }

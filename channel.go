@@ -6,8 +6,8 @@ import (
 )
 
 // Channel is any object that implements ImageReader as well as providing a
-// method for getting color.Gray16 values at given coordinates. It's worth
-// noting that image.Gray16 implements Channel.
+// method for getting color.Gray16 values at given coordinates. The standard
+// library's image.Gray16 implements Channel.
 type Channel interface {
 	ImageReader
 	Gray16At(x, y int) color.Gray16
@@ -70,14 +70,18 @@ func (c channel) Gray16At(x, y int) color.Gray16 {
 	return c.gray16At(x, y)
 }
 
-func ChannelsToRGBA64(r, g, b, a Channel) *image.RGBA64 {
+func (c channel) ColorModel() color.Model {
+	return color.Gray16Model
+}
+
+func ChannelsToNRGBA64(r, g, b, a Channel) *image.NRGBA64 {
 	bounds := r.Bounds().Union(g.Bounds()).Union(b.Bounds()).Union(a.Bounds())
-	img := image.NewRGBA64(bounds)
+	img := image.NewNRGBA64(bounds)
 	QuickRP(
 		AllPointsRP(
 			func(pt image.Point) {
 				img.Set(pt.X, pt.Y,
-					color.RGBA64{
+					color.NRGBA64{
 						R: r.Gray16At(pt.X, pt.Y).Y,
 						G: g.Gray16At(pt.X, pt.Y).Y,
 						B: b.Gray16At(pt.X, pt.Y).Y,
