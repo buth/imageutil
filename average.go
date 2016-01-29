@@ -5,10 +5,10 @@ import (
 	"image/color"
 )
 
-func AverageGray16(rect image.Rectangle, img *image.Gray16) color.Gray16 {
+func AverageGray16(rect image.Rectangle, img Channel) color.Gray16 {
 
 	// Only use the area of the rectangle that overlaps with the image bounds.
-	rect = rect.Union(img.Bounds())
+	rect = rect.Intersect(img.Bounds())
 
 	// Determine whether or not there's any area over which to determine an
 	// average.
@@ -32,7 +32,7 @@ func AverageGray16(rect image.Rectangle, img *image.Gray16) color.Gray16 {
 func AverageNRGBA64(rect image.Rectangle, img *image.NRGBA64) color.NRGBA64 {
 
 	// Only use the area of the rectangle that overlaps with the image bounds.
-	rect = rect.Union(img.Bounds())
+	rect = rect.Intersect(img.Bounds())
 
 	// Determine whether or not there's any area over which to determine an
 	// average.

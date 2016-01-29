@@ -93,7 +93,7 @@ func Invert(img ImageReader) ImageReader {
 	return invertedImage
 }
 
-func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
+func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	bounds := img.Bounds()
 	edgeImage := image.NewGray16(bounds)
 	if radius < 1 || padding < 0 {
@@ -101,8 +101,9 @@ func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
 	}
 
 	// Compute the horizontal and vertical averages.
-	hGA := image.NewGray16(bounds)
-	vGA := image.NewGray16(bounds)
+	averagesBounds := image.Rect(bounds.Min.X-radius+1, bounds.Min.Y-radius+1, bounds.Max.X, bounds.Max.Y)
+	hGA := image.NewGray16(averagesBounds)
+	vGA := image.NewGray16(averagesBounds)
 	QuickRP(
 		AllPointsRP(
 			func(pt image.Point) {
@@ -114,18 +115,18 @@ func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
 				)
 			},
 		),
-	)(bounds)
+	)(averagesBounds)
 
 	QuickRP(
 		AllPointsRP(
 			func(pt image.Point) {
-				e := float64(hGA.Gray16At(pt.X+1, pt.Y).Y)
-				w := float64(hGA.Gray16At(pt.X-radius, pt.Y).Y)
-				n := float64(vGA.Gray16At(pt.X, pt.Y+1).Y)
-				s := float64(vGA.Gray16At(pt.X, pt.Y-radius).Y)
+				e := float64(hGA.Gray16At(pt.X, pt.Y).Y)
+				w := float64(hGA.Gray16At(pt.X-radius+1, pt.Y).Y)
+				n := float64(vGA.Gray16At(pt.X, pt.Y).Y)
+				s := float64(vGA.Gray16At(pt.X, pt.Y-radius+1).Y)
 				edgeImage.Set(pt.X, pt.Y,
 					color.Gray16{
-						Y: uint16((math.Abs(e-w) + math.Abs(s-n)) / 2.0),
+						Y: uint16(math.Max(math.Abs(e-w), math.Abs(s-n))), //uint16((math.Abs(e-w) + math.Abs(s-n)) / 2.0),
 					},
 				)
 			},
