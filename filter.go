@@ -101,9 +101,8 @@ func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
 	}
 
 	// Compute the horizontal and vertical averages.
-	averagesBounds := image.Rect(bounds.Min.X-radius, bounds.Min.Y-radius, bounds.Max.X, bounds.Max.Y)
-	hGA := image.NewGray16(averagesBounds)
-	vGA := image.NewGray16(averagesBounds)
+	hGA := image.NewGray16(bounds)
+	vGA := image.NewGray16(bounds)
 	QuickRP(
 		AllPointsRP(
 			func(pt image.Point) {
@@ -115,7 +114,7 @@ func EdgesGray16(radius, padding int, img ImageReader) *image.Gray16 {
 				)
 			},
 		),
-	)(averagesBounds)
+	)(bounds)
 
 	QuickRP(
 		AllPointsRP(

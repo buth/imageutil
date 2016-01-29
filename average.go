@@ -5,7 +5,13 @@ import (
 	"image/color"
 )
 
-func AverageGray16(rect image.Rectangle, img ImageReader) color.Gray16 {
+func AverageGray16(rect image.Rectangle, img *image.Gray16) color.Gray16 {
+
+	// Only use the area of the rectangle that overlaps with the image bounds.
+	rect = rect.Union(img.Bounds())
+
+	// Determine whether or not there's any area over which to determine an
+	// average.
 	d := uint64(rect.Dx() * rect.Dy())
 	if d == 0 {
 		return color.Gray16{}
@@ -14,8 +20,7 @@ func AverageGray16(rect image.Rectangle, img ImageReader) color.Gray16 {
 	var y uint64
 	AllPointsRP(
 		func(pt image.Point) {
-			c := color.Gray16Model.Convert(img.At(pt.X, pt.Y)).(color.Gray16)
-			y += uint64(c.Y)
+			y += uint64(img.Gray16At(pt.X, pt.Y).Y)
 		},
 	)(rect)
 
@@ -24,7 +29,13 @@ func AverageGray16(rect image.Rectangle, img ImageReader) color.Gray16 {
 	}
 }
 
-func AverageNRGBA64(rect image.Rectangle, img ImageReader) color.NRGBA64 {
+func AverageNRGBA64(rect image.Rectangle, img *image.NRGBA64) color.NRGBA64 {
+
+	// Only use the area of the rectangle that overlaps with the image bounds.
+	rect = rect.Union(img.Bounds())
+
+	// Determine whether or not there's any area over which to determine an
+	// average.
 	d := uint64(rect.Dx() * rect.Dy())
 	if d == 0 {
 		return color.NRGBA64{}
@@ -33,7 +44,7 @@ func AverageNRGBA64(rect image.Rectangle, img ImageReader) color.NRGBA64 {
 	var r, g, b, a uint64
 	AllPointsRP(
 		func(pt image.Point) {
-			c := color.RGBA64Model.Convert(img.At(pt.X, pt.Y)).(color.NRGBA64)
+			c := img.NRGBA64At(pt.X, pt.Y)
 			r += uint64(c.R)
 			g += uint64(c.G)
 			b += uint64(c.B)
