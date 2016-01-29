@@ -122,8 +122,8 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 			func(pt image.Point) {
 				e := float64(hGA.Gray16At(pt.X+1, pt.Y).Y)
 				w := float64(hGA.Gray16At(pt.X-radius, pt.Y).Y)
-				n := float64(hGA.Gray16At(pt.X, pt.Y+1).Y)
-				s := float64(hGA.Gray16At(pt.X, pt.Y-radius).Y)
+				n := float64(vGA.Gray16At(pt.X, pt.Y+1).Y)
+				s := float64(vGA.Gray16At(pt.X, pt.Y-radius).Y)
 				edgeImage.Set(pt.X, pt.Y,
 					color.Gray16{
 						Y: uint16((math.Abs(e-w) + math.Abs(s-n)) / 2.0),
