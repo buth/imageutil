@@ -142,7 +142,8 @@ func NRectanglesRP(n int, rp RP) RP {
 	}
 }
 
-// QuickRowsRP
+// QuickRowsRP calls the given RP concurrently on each of GOMAXPROCS
+// horizontal rectangles that span the input rectangle.
 func QuickRowsRP(rp RP) RP {
 	gomaxprocs := runtime.GOMAXPROCS(-1)
 	if gomaxprocs == 1 {
@@ -158,7 +159,7 @@ func QuickRowsRP(rp RP) RP {
 		// Wrap the processor with an asynchronous processor.
 		rp = ConcurrentRP(&w, rp)
 
-		// Wrap the processor with a set count columns processor.
+		// Wrap the processor with a set count rows processor.
 		rp = NRowsRP(gomaxprocs, rp)
 
 		// Call the processor on the entire bounds.
@@ -166,7 +167,8 @@ func QuickRowsRP(rp RP) RP {
 	}
 }
 
-// QuickColumnsRP
+// QuickColumnsRP calls the given RP concurrently on each of GOMAXPROCS
+// vertical rectangles that span the input rectangle.
 func QuickColumnsRP(rp RP) RP {
 	gomaxprocs := runtime.GOMAXPROCS(-1)
 	if gomaxprocs == 1 {
@@ -190,26 +192,14 @@ func QuickColumnsRP(rp RP) RP {
 	}
 }
 
-// QuickRP
+// QuickRP calls the given RP concurrently on each of GOMAXPROCS horizontal or
+// vertical rectangles that span the input rectangle.
 func QuickRP(rp RP) RP {
-	gomaxprocs := runtime.GOMAXPROCS(-1)
-	if gomaxprocs == 1 {
-		return rp
-	}
-
 	return func(rect image.Rectangle) {
-
-		// Create a new wait group and defer the wait.
-		var w sync.WaitGroup
-		defer w.Wait()
-
-		// Wrap the processor with an asynchronous processor.
-		rp = ConcurrentRP(&w, rp)
-
-		// Wrap the processor with a set count columns processor.
-		rp = NRectanglesRP(gomaxprocs, rp)
-
-		// Call the processor on the entire bounds.
-		rp(rect)
+		if rect.Dx() > rect.Dy() {
+			QuickColumnsRP(rp)(rect)
+		} else {
+			QuickRowsRP(rp)(rect)
+		}
 	}
 }
