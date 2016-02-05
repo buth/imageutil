@@ -12,110 +12,76 @@ func Invert(img ImageReader) ImageReader {
 		pp            PP
 	)
 
+	bounds := img.Bounds()
 	switch img.(type) {
 	case *image.Alpha, *image.Alpha16:
 		return img
 	case *image.Gray:
-		invertedImage = image.NewGray(img.Bounds())
+		invertedImage = image.NewGray(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.Gray)
-			invertedImage.Set(pt.X, pt.Y,
-				color.Gray{
-					Y: math.MaxInt8 - c.Y,
-				},
-			)
+			c.Y = math.MaxInt8 - c.Y
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	case *image.Gray16:
-		invertedImage = image.NewGray16(img.Bounds())
+		invertedImage = image.NewGray16(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.Gray16)
-			invertedImage.Set(pt.X, pt.Y,
-				color.Gray16{
-					Y: math.MaxInt16 - c.Y,
-				},
-			)
+			c.Y = math.MaxInt8 - c.Y
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	case *image.NRGBA:
-		invertedImage = image.NewNRGBA(img.Bounds())
+		invertedImage = image.NewNRGBA(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.NRGBA)
-			invertedImage.Set(pt.X, pt.Y,
-				color.NRGBA{
-					R: math.MaxUint8 - c.R,
-					G: math.MaxUint8 - c.G,
-					B: math.MaxUint8 - c.B,
-					A: c.A,
-				},
-			)
+			c.R = math.MaxUint8 - c.R
+			c.G = math.MaxUint8 - c.G
+			c.B = math.MaxUint8 - c.B
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	case *image.NRGBA64:
-		invertedImage = image.NewNRGBA64(img.Bounds())
+		invertedImage = image.NewNRGBA64(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.NRGBA64)
-			invertedImage.Set(pt.X, pt.Y,
-				color.NRGBA64{
-					R: math.MaxUint16 - c.R,
-					G: math.MaxUint16 - c.G,
-					B: math.MaxUint16 - c.B,
-					A: c.A,
-				},
-			)
+			c.R = math.MaxUint16 - c.R
+			c.G = math.MaxUint16 - c.G
+			c.B = math.MaxUint16 - c.B
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	case *image.RGBA:
-		invertedImage = image.NewNRGBA(img.Bounds())
+		invertedImage = image.NewNRGBA(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.RGBA)
-			invertedImage.Set(pt.X, pt.Y,
-				color.RGBA{
-					R: c.A - c.R,
-					G: c.A - c.G,
-					B: c.A - c.B,
-					A: c.A,
-				},
-			)
+			c.R = c.A - c.R
+			c.G = c.A - c.G
+			c.B = c.A - c.B
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	case *image.RGBA64:
-		invertedImage = image.NewRGBA64(img.Bounds())
+		invertedImage = image.NewRGBA64(bounds)
 		pp = func(pt image.Point) {
 			c := img.At(pt.X, pt.Y).(color.RGBA64)
-			invertedImage.Set(pt.X, pt.Y,
-				color.RGBA64{
-					R: c.A - c.R,
-					G: c.A - c.G,
-					B: c.A - c.B,
-					A: c.A,
-				},
-			)
+			c.R = c.A - c.R
+			c.G = c.A - c.G
+			c.B = c.A - c.B
+			invertedImage.Set(pt.X, pt.Y, c)
 		}
 	}
 
-	QuickRP(AllPointsRP(pp))(img.Bounds())
+	QuickRP(AllPointsRP(pp))(bounds)
 	return invertedImage
 }
 
-func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
+func EdgesGray16(radius int, img Channel) *image.Gray16 {
 	bounds := img.Bounds()
 	edgeImage := image.NewGray16(bounds)
-	if radius < 1 || padding < 0 {
+	if radius < 1 {
 		return edgeImage
 	}
 
 	// Compute the horizontal and vertical averages.
-	averagesBounds := image.Rect(bounds.Min.X-radius+1, bounds.Min.Y-radius+1, bounds.Max.X, bounds.Max.Y)
-	hGA := image.NewGray16(averagesBounds)
-	vGA := image.NewGray16(averagesBounds)
-	QuickRP(
-		AllPointsRP(
-			func(pt image.Point) {
-				hGA.Set(pt.X, pt.Y,
-					AverageGray16(image.Rect(pt.X, pt.Y-padding, pt.X+radius, pt.Y+padding+1), img),
-				)
-				vGA.Set(pt.X, pt.Y,
-					AverageGray16(image.Rect(pt.X-padding, pt.Y, pt.X+padding+1, pt.Y+radius), img),
-				)
-			},
-		),
-	)(averagesBounds)
+	hGA := RowAverageGray16(radius, img)
+	vGA := ColumnAverageGray16(radius, img)
 
 	QuickRP(
 		AllPointsRP(
@@ -136,10 +102,10 @@ func EdgesGray16(radius, padding int, img Channel) *image.Gray16 {
 	return edgeImage
 }
 
-func EdgesNRGBA64(radius, padding int, img *image.NRGBA64) *image.NRGBA64 {
+func EdgesNRGBA64(radius int, img *image.NRGBA64) *image.NRGBA64 {
 	r, g, b, a := NRGBA64ToChannels(img)
-	r = EdgesGray16(radius, padding, r)
-	g = EdgesGray16(radius, padding, g)
-	b = EdgesGray16(radius, padding, b)
+	r = EdgesGray16(radius, r)
+	g = EdgesGray16(radius, g)
+	b = EdgesGray16(radius, b)
 	return ChannelsToNRGBA64(r, g, b, a)
 }

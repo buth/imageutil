@@ -142,6 +142,54 @@ func NRectanglesRP(n int, rp RP) RP {
 	}
 }
 
+// QuickRowsRP
+func QuickRowsRP(rp RP) RP {
+	gomaxprocs := runtime.GOMAXPROCS(-1)
+	if gomaxprocs == 1 {
+		return rp
+	}
+
+	return func(rect image.Rectangle) {
+
+		// Create a new wait group and defer the wait.
+		var w sync.WaitGroup
+		defer w.Wait()
+
+		// Wrap the processor with an asynchronous processor.
+		rp = ConcurrentRP(&w, rp)
+
+		// Wrap the processor with a set count columns processor.
+		rp = NRowsRP(gomaxprocs, rp)
+
+		// Call the processor on the entire bounds.
+		rp(rect)
+	}
+}
+
+// QuickColumnsRP
+func QuickColumnsRP(rp RP) RP {
+	gomaxprocs := runtime.GOMAXPROCS(-1)
+	if gomaxprocs == 1 {
+		return rp
+	}
+
+	return func(rect image.Rectangle) {
+
+		// Create a new wait group and defer the wait.
+		var w sync.WaitGroup
+		defer w.Wait()
+
+		// Wrap the processor with an asynchronous processor.
+		rp = ConcurrentRP(&w, rp)
+
+		// Wrap the processor with a set count columns processor.
+		rp = NColumnsRP(gomaxprocs, rp)
+
+		// Call the processor on the entire bounds.
+		rp(rect)
+	}
+}
+
 // QuickRP
 func QuickRP(rp RP) RP {
 	gomaxprocs := runtime.GOMAXPROCS(-1)
