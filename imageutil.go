@@ -38,65 +38,105 @@ func Copy(dst ImageReadWriter, src ImageReader) {
 	}
 }
 
-// ConvertToRGBA returns a new copy of an ImageReader as a new RGBA using Copy
-// to concurrently set Color values.
+// ConvertToRGBA returns an *image.RGBA instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.RGBA instance with the same
+// bounds.
 func ConvertToRGBA(src ImageReader) *image.RGBA {
+	if dst, ok := src.(*image.RGBA); ok {
+		return dst
+	}
 	dst := image.NewRGBA(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToRGBA64 returns a new copy of an ImageReader as a new RGBA64 using
-// Copy to concurrently set Color values.
+// ConvertToRGBA64 returns an *image.RGBA64 instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.RGBA64 instance with the same
+// bounds.
 func ConvertToRGBA64(src ImageReader) *image.RGBA64 {
+	if dst, ok := src.(*image.RGBA64); ok {
+		return dst
+	}
 	dst := image.NewRGBA64(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToNRGBA returns a new copy of an ImageReader as a new NRGBA using
-// Copy to concurrently set Color values.
+// ConvertToNRGBA returns an *image.NRGBA instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.NRGBA instance with the same
+// bounds.
 func ConvertToNRGBA(src ImageReader) *image.NRGBA {
+	if dst, ok := src.(*image.NRGBA); ok {
+		return dst
+	}
 	dst := image.NewNRGBA(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToNRGBA64 returns a new copy of an ImageReader as a new NRGBA64
-// using Copy to concurrently set Color values.
+// ConvertToNRGBA64 returns an *image.NRGBA64 instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.NRGBA64 instance with the same
+// bounds.
 func ConvertToNRGBA64(src ImageReader) *image.NRGBA64 {
+	if dst, ok := src.(*image.NRGBA64); ok {
+		return dst
+	}
 	dst := image.NewNRGBA64(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToAlpha returns a new copy of an ImageReader as a new Alpha using
-// Copy to concurrently set Color values.
+// ConvertToAlpha returns an *image.Alpha instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.Alpha instance with the same
+// bounds.
 func ConvertToAlpha(src ImageReader) *image.Alpha {
+	if dst, ok := src.(*image.Alpha); ok {
+		return dst
+	}
 	dst := image.NewAlpha(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToAlpha16 returns a new copy of an ImageReader as a new Alpha16
-// using Copy to concurrently set Color values.
+// ConvertToAlpha16 returns an *image.Alpha16 instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.Alpha16 instance with the same
+// bounds.
 func ConvertToAlpha16(src ImageReader) *image.Alpha16 {
+	if dst, ok := src.(*image.Alpha16); ok {
+		return dst
+	}
 	dst := image.NewAlpha16(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToGray returns a new copy of an ImageReader as a new Gray using Copy
-// to concurrently set Color values.
+// ConvertToGray returns an *image.Gray instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.Gray instance with the same
+// bounds.
 func ConvertToGray(src ImageReader) *image.Gray {
+	if dst, ok := src.(*image.Gray); ok {
+		return dst
+	}
 	dst := image.NewGray(src.Bounds())
 	Copy(dst, src)
 	return dst
 }
 
-// ConvertToGray16 returns a new copy of an ImageReader as a new Gray16 using
-// Copy to concurrently set Color values.
+// ConvertToGray16 returns an *image.Gray16 instance by asserting the given
+// ImageReader has that type or, if it does not, using Copy to concurrently
+// set the color.Color values of a new *image.Gray16 instance with the same
+// bounds.
 func ConvertToGray16(src ImageReader) *image.Gray16 {
+	if dst, ok := src.(*image.Gray16); ok {
+		return dst
+	}
 	dst := image.NewGray16(src.Bounds())
 	Copy(dst, src)
 	return dst
