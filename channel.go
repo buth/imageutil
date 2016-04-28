@@ -19,7 +19,7 @@ type channel struct {
 	gray16At func(x, y int) color.Gray16
 }
 
-// Channels decomposes a given ImageReader into red, green, blue, and alpha Channels.
+// Channels decomposes a given NRGBA64 into red, green, blue, and alpha Channels.
 func NRGBA64ToChannels(img *image.NRGBA64) (r, g, b, a Channel) {
 	r = channel{
 		bounds: img.Bounds,
