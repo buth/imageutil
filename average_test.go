@@ -11,6 +11,7 @@ func TestRowAverageGray16(t *testing.T) {
 	for i := 0; i < 1024; i++ {
 		testImage.Set(i, 0, color.Gray16{Y: uint16(i)})
 	}
+
 	resultImage := RowAverageGray16(10, testImage)
 
 	for i := 0; i < 1024; i++ {

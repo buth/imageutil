@@ -58,5 +58,4 @@ func TestPointsRP(t *testing.T) {
 			t.Error("specifying an origin not in the rectangle did not result in a noop")
 		})(oneByOne)
 	}
-
 }
